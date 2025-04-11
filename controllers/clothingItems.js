@@ -9,7 +9,7 @@ const createItem = (req, res) => {
   ClothingItem.create({ name, weather, imageUrl })
     .orFail()
     .then((item) => {
-      res.status(201).send({ data: item });
+      res.status("201").send({ data: item });
     })
     .catch((err) => {
       console.log(err);
