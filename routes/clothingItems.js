@@ -13,6 +13,6 @@ router.get('/', getItems)
 //Like
 router.put('/:itemId/likes', likeItem);
 //Dislike
-router.put('/:itemId/likes', dislikeItem);
+router.delete('/:itemId/likes', dislikeItem);
 
 module.exports = router;
