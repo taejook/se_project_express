@@ -1,10 +1,7 @@
 const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST_STATUS_CODE,
-  CONFLICT_STATUS_CODE,
-  UNAUTHORIZED_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
-  FORBIDDEN_STATUS_CODE,
   SERVER_ERROR_STATUS_CODE,
 } = require("../utils/errors");
 
