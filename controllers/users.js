@@ -12,7 +12,7 @@ const {
 
 // GET /users
 
-const getUsers = (req, res) => {
+const getCurrentUser = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
@@ -82,4 +82,4 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, login };
+module.exports = { getCurrentUser, createUser, getUser, login };
