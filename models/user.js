@@ -1,18 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcrpyt");
-
-userSchema.pre("save", function (next) {
-  if (!this.isModified("password")) return next;
-
-  bcrypt
-    .hash(this.password, 10)
-    .then((hash) => {
-      this.password = hash;
-      next();
-    })
-    .catch(next);
-});
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -41,10 +29,23 @@ const userSchema = new mongoose.Schema({
     },
   },
   password: {
+    type: String,
     required: true,
     select: false,
     minlength: 8,
   },
+});
+
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password")) return next;
+
+  bcrypt
+    .hash(this.password, 10)
+    .then((hash) => {
+      this.password = hash;
+      next();
+    })
+    .catch(next);
 });
 
 userSchema.statics.findUserByCredentials = function findUserByCredentials (email, password) {

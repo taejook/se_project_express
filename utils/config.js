@@ -1,9 +1,5 @@
-const jwt = require("jsonwebtoken");
+const { JWT_SECRET = "super-strong-secret" } = process.env;
 
-const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-    expiresIn: "7d",
-  });
-
-  module.exports = {
-    token
-  }
+module.exports = {
+  JWT_SECRET,
+};
