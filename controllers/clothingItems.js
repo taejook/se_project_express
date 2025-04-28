@@ -123,11 +123,11 @@ const deleteItem = (req, res) => {
           .send({ message: "You are not authorized to delete this item." });
       }
 
-      return ClothingItem.findByIdAndDelete(itemId).orFail();
+      return ClothingItem.findByIdAndDelete(itemId).orFail()
+      .then(() =>
+        res.status(200).send({ message: "Item deleted successfully" })
+      )
     })
-    .then((item) =>
-      res.status(200).send({ message: "Item deleted successfully" })
-    )
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError") {

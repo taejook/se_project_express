@@ -1,11 +1,9 @@
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const { JWT_SECRET } = require("../utils/config");
+const User = require("../models/user");
 const {
   BAD_REQUEST_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
-  UNAUTHORIZED_STATUS_CODE,
   SERVER_ERROR_STATUS_CODE,
   CONFLICT_STATUS_CODE,
 } = require("../utils/errors");
@@ -13,7 +11,12 @@ const {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar, email, password })
+  if (!email || !password) {
+    return res
+      .status(BAD_REQUEST_STATUS_CODE)
+      .send({ message: "The password and email fields are required" });
+  }
+  return User.create({ name, avatar, email, password })
     .then((user) => {
       const userData = user.toObject();
       delete userData.password;
@@ -38,8 +41,13 @@ const createUser = (req, res) => {
 
 const login = (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    return res
+      .status(BAD_REQUEST_STATUS_CODE)
+      .send({ message: "Email and password are required" });
+  }
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -47,9 +55,15 @@ const login = (req, res) => {
       return res.status(200).send({ message: "Authorized", token });
     })
     .catch((err) => {
+      if (err.message === "Incorrect email or password!") {
+        return res
+          .status(BAD_REQUEST_STATUS_CODE)
+          .send({ message: "Information entered is invalid" });
+      }
+
       return res
-        .status(BAD_REQUEST_STATUS_CODE)
-        .send({ message: "Incorrect email or password" });
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -57,9 +71,7 @@ const getCurrentUser = (req, res) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail()
-    .then((user) => {
-      return res.status(200).send(user);
-    })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
@@ -88,9 +100,7 @@ const updateCurrentUser = (req, res) => {
     { new: true, runValidators: true }
   )
     .orFail()
-    .then((user) => {
-      return res.status(200).send(user);
-    })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
