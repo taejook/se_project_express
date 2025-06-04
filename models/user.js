@@ -10,15 +10,15 @@ const userSchema = new mongoose.Schema({
     maxlength: 30,
   },
   avatar: {
-    type: String,
-    required: [true, "The avatar field is required."],
-    validate: {
-      validator(value) {
-        return validator.isURL(value);
-      },
-      message: "You must enter a valid URL",
+  type: String,
+  validate: {
+    validator(value) {
+      if (!value) return true;  // Allow empty or undefined values
+      return validator.isURL(value);
     },
+    message: "You must enter a valid URL",
   },
+},
   email: {
     type: String,
     required: true,
