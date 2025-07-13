@@ -6,7 +6,7 @@ const {
   FORBIDDEN_STATUS_CODE,
 } = require("../utils/errors");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
@@ -19,14 +19,13 @@ const createItem = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: err.message });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
     .orFail()
     .then((item) => {
@@ -43,14 +42,13 @@ const getItems = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid item ID" });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -73,14 +71,13 @@ const likeItem = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid item ID" });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -103,14 +100,13 @@ const dislikeItem = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid item ID" });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
@@ -139,10 +135,9 @@ const deleteItem = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid item ID" });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 

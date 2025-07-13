@@ -8,7 +8,7 @@ const {
   CONFLICT_STATUS_CODE,
 } = require("../utils/errors");
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
@@ -32,10 +32,9 @@ const createUser = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Please check email and password requirements." });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -59,15 +58,13 @@ const login = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Information entered is invalid" });
+      } else {
+        next(err);
       }
-
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail()
@@ -83,14 +80,13 @@ const getCurrentUser = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid User ID" });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const updateCurrentUser = (req, res) => {
+const updateCurrentUser = (req, res, next) => {
   const { name, avatar } = req.body;
   const userId = req.user._id;
 
@@ -112,10 +108,9 @@ const updateCurrentUser = (req, res) => {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid User ID" });
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
