@@ -1,19 +1,16 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 const User = require("../models/user");
-const {
-  BAD_REQUEST_STATUS_CODE,
-  NOT_FOUND_STATUS_CODE,
-  SERVER_ERROR_STATUS_CODE,
-  CONFLICT_STATUS_CODE,
-} = require("../utils/errors");
+const { NotFoundError } = require("../utils/NotFoundError");
+const { BadRequestError } = require("../utils/BadRequestError");
+const { ConflictError } = require("../utils/ConflictError");
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
     return res
-      .status(BAD_REQUEST_STATUS_CODE)
+      .status(BadRequestError)
       .send({ message: "The password and email fields are required" });
   }
   return User.create({ name, avatar, email, password })
@@ -25,24 +22,24 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       if (err.code === 11000) {
         return res
-          .status(CONFLICT_STATUS_CODE)
+          .status(ConflictError)
           .send({ message: "Email already exists" });
       }
       if (err.name === "ValidationError") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Please check email and password requirements." });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res
-      .status(BAD_REQUEST_STATUS_CODE)
+      .status(BadRequestError)
       .send({ message: "Email and password are required" });
   }
 
@@ -56,11 +53,11 @@ const login = (req, res) => {
     .catch((err) => {
       if (err.message === "Incorrect email or password!") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Information entered is invalid" });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 
@@ -71,18 +68,18 @@ const getCurrentUser = (req, res, next) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === "NotFoundError") {
         return res
-          .status(NOT_FOUND_STATUS_CODE)
+          .status(NotFoundError)
           .send({ message: "User not found" });
       }
-      if (err.name === "CastError") {
+      if (err.name === "BadRequestError") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Invalid User ID" });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 
@@ -101,16 +98,16 @@ const updateCurrentUser = (req, res, next) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         return res
-          .status(NOT_FOUND_STATUS_CODE)
+          .status(NotFoundError)
           .send({ message: "User not found" });
       }
       if (err.name === "CastError") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Invalid User ID" });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 

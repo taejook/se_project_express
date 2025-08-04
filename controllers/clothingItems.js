@@ -1,10 +1,8 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST_STATUS_CODE,
-  NOT_FOUND_STATUS_CODE,
-  SERVER_ERROR_STATUS_CODE,
-  FORBIDDEN_STATUS_CODE,
-} = require("../utils/errors");
+const { ForbiddenError } = require("../utils/ForbiddenError");
+const { NotFoundError } = require("../utils/NotFoundError");
+const { BadRequestError } = require("../utils/BadRequestError");
+const { AuthorizationError } = require("../utils/AuthorizationError");
 
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
@@ -16,12 +14,15 @@ const createItem = (req, res, next) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
-      } else {
-        next(err);
+        return next(new BadRequestError({ message: err.message }));
       }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "AuthorizationError") {
+        return next(new AuthorizationError("Unauthorized"));
+      }
+      return next(err);
     });
 };
 
@@ -33,18 +34,18 @@ const getItems = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === "NotFoundError") {
         return res
-          .status(NOT_FOUND_STATUS_CODE)
+          .status(NotFoundError)
           .send({ message: "Item not found" });
       }
-      if (err.name === "CastError") {
+      if (err.name === "BadRequestError") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Invalid item ID" });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 
@@ -62,18 +63,18 @@ const likeItem = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === "NotFoundError") {
         return res
-          .status(NOT_FOUND_STATUS_CODE)
+          .status(NotFoundError)
           .send({ message: "Item not found" });
       }
-      if (err.name === "CastError") {
+      if (err.name === "BadRequestError") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Invalid item ID" });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 
@@ -91,18 +92,18 @@ const dislikeItem = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === "NotFoundError") {
         return res
-          .status(NOT_FOUND_STATUS_CODE)
+          .status(NotFoundError)
           .send({ message: "Item not found" });
       }
-      if (err.name === "CastError") {
+      if (err.name === "BadRequestError") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Invalid item ID" });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 
@@ -115,29 +116,30 @@ const deleteItem = (req, res, next) => {
     .then((item) => {
       if (item.owner.toString() !== userId.toString()) {
         return res
-          .status(FORBIDDEN_STATUS_CODE)
+          .status(ForbiddenError)
           .send({ message: "You are not authorized to delete this item." });
       }
 
-      return ClothingItem.findByIdAndDelete(itemId).orFail()
-      .then(() =>
-        res.status(200).send({ message: "Item deleted successfully" })
-      )
+      return ClothingItem.findByIdAndDelete(itemId)
+        .orFail()
+        .then(() =>
+          res.status(200).send({ message: "Item deleted successfully" })
+        );
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === "NotFoundError") {
         return res
-          .status(NOT_FOUND_STATUS_CODE)
+          .status(NotFoundError)
           .send({ message: "Item not found" });
       }
-      if (err.name === "CastError") {
+      if (err.name === "BadRequestError") {
         return res
-          .status(BAD_REQUEST_STATUS_CODE)
+          .status(BadRequestError)
           .send({ message: "Invalid item ID" });
-      } else {
-        next(err);
-      }
+      } 
+        return next(err);
+      
     });
 };
 
