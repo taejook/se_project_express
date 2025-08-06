@@ -14,13 +14,7 @@ const createItem = (req, res, next) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "ValidationError") {
-        return next(new BadRequestError({ message: err.message }));
-      }
-      if (err.name === "BadRequestError") {
-        return next(new BadRequestError({ message: err.message }));
-      }
-      if (err.name === "AuthorizationError") {
-        return next(new AuthorizationError("Unauthorized"));
+        return next(new BadRequestError(err.message));
       }
       return next(err);
     });
@@ -34,18 +28,10 @@ const getItems = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "NotFoundError") {
-        return res
-          .status(NotFoundError)
-          .send({ message: "Item not found" });
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("Item not found"));
       }
-      if (err.name === "BadRequestError") {
-        return res
-          .status(BadRequestError)
-          .send({ message: "Invalid item ID" });
-      } 
-        return next(err);
-      
+      return next(err);
     });
 };
 
@@ -63,18 +49,13 @@ const likeItem = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "NotFoundError") {
-        return res
-          .status(NotFoundError)
-          .send({ message: "Item not found" });
+      if (err.name === "DocumentNotFoundError ") {
+        return res.status(NotFoundError).send({ message: "Item not found" });
       }
-      if (err.name === "BadRequestError") {
-        return res
-          .status(BadRequestError)
-          .send({ message: "Invalid item ID" });
-      } 
-        return next(err);
-      
+      if (err.name === "CastError") {
+        return res.status(BadRequestError).send({ message: "Invalid item ID" });
+      }
+      return next(err);
     });
 };
 
@@ -92,18 +73,13 @@ const dislikeItem = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "NotFoundError") {
-        return res
-          .status(NotFoundError)
-          .send({ message: "Item not found" });
+      if (err.name === "DocumentNotFoundError ") {
+        return res.status(NotFoundError).send({ message: "Item not found" });
       }
-      if (err.name === "BadRequestError") {
-        return res
-          .status(BadRequestError)
-          .send({ message: "Invalid item ID" });
-      } 
-        return next(err);
-      
+      if (err.name === "CastError") {
+        return res.status(BadRequestError).send({ message: "Invalid item ID" });
+      }
+      return next(err);
     });
 };
 
@@ -128,18 +104,13 @@ const deleteItem = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "NotFoundError") {
-        return res
-          .status(NotFoundError)
-          .send({ message: "Item not found" });
+      if (err.name === "DocumentNotFoundError ") {
+        return res.status(NotFoundError).send({ message: "Item not found" });
       }
-      if (err.name === "BadRequestError") {
-        return res
-          .status(BadRequestError)
-          .send({ message: "Invalid item ID" });
-      } 
-        return next(err);
-      
+      if (err.name === "CastError") {
+        return res.status(BadRequestError).send({ message: "Invalid item ID" });
+      }
+      return next(err);
     });
 };
 

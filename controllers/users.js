@@ -9,9 +9,9 @@ const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BadRequestError)
-      .send({ message: "The password and email fields are required" });
+    return next(
+      new BadRequestError("The password and email fields are required")
+    );
   }
   return User.create({ name, avatar, email, password })
     .then((user) => {
@@ -29,9 +29,8 @@ const createUser = (req, res, next) => {
         return res
           .status(BadRequestError)
           .send({ message: "Please check email and password requirements." });
-      } 
-        return next(err);
-      
+      }
+      return next(err);
     });
 };
 
@@ -53,11 +52,10 @@ const login = (req, res, next) => {
     .catch((err) => {
       if (err.message === "Incorrect email or password!") {
         return res
-          .status(BadRequestError)
+          .status(AuthorizationError)
           .send({ message: "Information entered is invalid" });
-      } 
-        return next(err);
-      
+      }
+      return next(err);
     });
 };
 
@@ -68,18 +66,13 @@ const getCurrentUser = (req, res, next) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === "NotFoundError") {
-        return res
-          .status(NotFoundError)
-          .send({ message: "User not found" });
+      if (err.name === "DocumentNotFoundError ") {
+        return res.status(NotFoundError).send({ message: "User not found" });
       }
-      if (err.name === "BadRequestError") {
-        return res
-          .status(BadRequestError)
-          .send({ message: "Invalid User ID" });
-      } 
-        return next(err);
-      
+      if (err.name === "CastError") {
+        return res.status(BadRequestError).send({ message: "Invalid User ID" });
+      }
+      return next(err);
     });
 };
 
@@ -97,17 +90,12 @@ const updateCurrentUser = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NotFoundError)
-          .send({ message: "User not found" });
+        return res.status(NotFoundError).send({ message: "User not found" });
       }
       if (err.name === "CastError") {
-        return res
-          .status(BadRequestError)
-          .send({ message: "Invalid User ID" });
-      } 
-        return next(err);
-      
+        return res.status(BadRequestError).send({ message: "Invalid User ID" });
+      }
+      return next(err);
     });
 };
 
