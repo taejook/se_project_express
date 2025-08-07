@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 const User = require("../models/user");
-const { NotFoundError } = require("../utils/NotFoundError");
 const { BadRequestError } = require("../utils/BadRequestError");
 const { ConflictError } = require("../utils/ConflictError");
+const { AuthorizationError } = require("../utils/AuthorizationError");
+const { NotFoundError } = require("../utils/NotFoundError");
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
@@ -21,14 +22,12 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return res
-          .status(ConflictError)
-          .send({ message: "Email already exists" });
+        return next(new ConflictError("Email already exists"));
       }
       if (err.name === "ValidationError") {
-        return res
-          .status(BadRequestError)
-          .send({ message: "Please check email and password requirements." });
+        return next(
+          new BadRequestError("Please check email and password requirements.")
+        );
       }
       return next(err);
     });
@@ -37,9 +36,9 @@ const createUser = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(BadRequestError)
-      .send({ message: "Email and password are required" });
+    return next(
+      new BadRequestError("The password and email fields are required")
+    );
   }
 
   return User.findUserByCredentials(email, password)
@@ -51,9 +50,7 @@ const login = (req, res, next) => {
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password!") {
-        return res
-          .status(AuthorizationError)
-          .send({ message: "Information entered is invalid" });
+        return next(new AuthorizationError("Information entered is invalid"));
       }
       return next(err);
     });
@@ -67,10 +64,10 @@ const getCurrentUser = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError ") {
-        return res.status(NotFoundError).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
       if (err.name === "CastError") {
-        return res.status(BadRequestError).send({ message: "Invalid User ID" });
+        return next(new BadRequestError("Invalid user ID"));
       }
       return next(err);
     });
@@ -90,10 +87,10 @@ const updateCurrentUser = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NotFoundError).send({ message: "User not found" });
+        return next(new BadRequestError("User not found"));
       }
       if (err.name === "CastError") {
-        return res.status(BadRequestError).send({ message: "Invalid User ID" });
+        return next(new BadRequestError("Invalid user ID"));
       }
       return next(err);
     });

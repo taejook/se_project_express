@@ -2,7 +2,6 @@ const ClothingItem = require("../models/clothingItem");
 const { ForbiddenError } = require("../utils/ForbiddenError");
 const { NotFoundError } = require("../utils/NotFoundError");
 const { BadRequestError } = require("../utils/BadRequestError");
-const { AuthorizationError } = require("../utils/AuthorizationError");
 
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
@@ -50,10 +49,10 @@ const likeItem = (req, res, next) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError ") {
-        return res.status(NotFoundError).send({ message: "Item not found" });
+        return next(new BadRequestError("Item not found")); 
       }
       if (err.name === "CastError") {
-        return res.status(BadRequestError).send({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID")); 
       }
       return next(err);
     });
@@ -74,10 +73,10 @@ const dislikeItem = (req, res, next) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError ") {
-        return res.status(NotFoundError).send({ message: "Item not found" });
+        return next(new BadRequestError("Item not found")); 
       }
       if (err.name === "CastError") {
-        return res.status(BadRequestError).send({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID")); 
       }
       return next(err);
     });
@@ -91,9 +90,7 @@ const deleteItem = (req, res, next) => {
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== userId.toString()) {
-        return res
-          .status(ForbiddenError)
-          .send({ message: "You are not authorized to delete this item." });
+        return next(new ForbiddenError("You are not authorized to delete this item"))
       }
 
       return ClothingItem.findByIdAndDelete(itemId)
@@ -105,10 +102,10 @@ const deleteItem = (req, res, next) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "DocumentNotFoundError ") {
-        return res.status(NotFoundError).send({ message: "Item not found" });
+        return next(new BadRequestError("Item not found")); 
       }
       if (err.name === "CastError") {
-        return res.status(BadRequestError).send({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID")); 
       }
       return next(err);
     });
