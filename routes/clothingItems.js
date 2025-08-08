@@ -13,9 +13,9 @@ router.get('/', getItems)
 
 router.use(auth);
 // Delete
-router.delete('/:itemId', validateClothingItem, deleteItem)
+router.delete('/:itemId', validateId, deleteItem)
 // CREATE
-router.post('/', validateId, createItem);
+router.post('/', validateClothingItem, createItem);
 // Like
 router.put('/:itemId/likes', validateId, likeItem);
 // Dislike
